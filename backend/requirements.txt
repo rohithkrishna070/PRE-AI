@@ -1,0 +1,31 @@
+# ==============================================================================
+# PRE-AI Backend Dependencies
+# ------------------------------------------------------------------------------
+# This file lists all external Python libraries required by the PRE-AI backend.
+# Run `pip install -r requirements.txt` to install them into your virtual environment.
+# ==============================================================================
+
+# 1. Web Framework & Server
+fastapi>=0.110.0          # Modern, fast web framework for building APIs with Python
+uvicorn[standard]>=0.28.0 # High-performance ASGI server to run FastAPI apps
+
+# 2. Database & ORM (Object-Relational Mapping)
+sqlalchemy>=2.0.28        # Powerful ORM to interact with databases using Python classes
+psycopg2-binary>=2.9.9    # PostgreSQL adapter for Python (enables connecting to Postgres)
+python-dotenv>=1.0.1      # Loads environment variables from a .env file into os.environ
+
+# 3. Data Validation & Settings
+pydantic>=2.6.4           # Data validation and settings management using Python type hints
+pydantic-settings>=2.2.1  # Settings management for Pydantic v2
+
+# 4. Security & Authentication
+pyjwt>=2.8.0              # JSON Web Token (JWT) library for user authentication tokens
+passlib[bcrypt]>=1.7.4    # Password hashing library using Bcrypt algorithm
+python-multipart>=0.0.9   # Support for parsing form data and file uploads in FastAPI
+
+# 5. AI Providers & HTTP Clients
+google-genai>=0.1.1       # Official Google Gemini AI SDK for Python
+httpx>=0.27.0             # Asynchronous HTTP client (used to talk to local Ollama API)
+
+# 6. Testing & Quality Assurance
+pytest>=8.1.1             # Testing framework for writing and running unit/integration tests

@@ -1,0 +1,55 @@
+# ==============================================================================
+# PRE-AI Multi-Container Orchestration (docker-compose.yml)
+# ------------------------------------------------------------------------------
+# CONCEPT EXPLANATION:
+# Docker Compose launches all 3 platform services simultaneously:
+# 1. db: PostgreSQL Database Container (Port 5432)
+# 2. backend: FastAPI Python Server (Port 8000)
+# 3. frontend: React Web Application (Port 3000)
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: preai_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: preai_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. FastAPI Backend Service
+  backend:
+    build: ./backend
+    container_name: preai_backend
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=preai_db
+    depends_on:
+      - db
+
+  # 3. React Frontend Service
+  frontend:
+    build: ./frontend
+    container_name: preai_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
