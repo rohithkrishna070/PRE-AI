@@ -6,9 +6,11 @@ CONCEPT EXPLANATION: FastAPI Route Controllers
 In FastAPI, route controllers map incoming HTTP REST requests (POST/GET) to 
 business service logic and database operations.
 
-Endpoints:
-- POST /api/v1/auth/register: Registers a new user.
-- POST /api/v1/auth/login: Authenticates user and returns JWT token.
+Syntax Breakdown:
+- `@router.post(...)`: Maps an HTTP POST endpoint.
+- `status_code=status.HTTP_201_CREATED`: Sets 201 Created header on successful signup.
+- `response_model=UserResponse`: Ensures passwords are never returned in JSON responses.
+- `HTTPException`: Generates RFC-compliant JSON error bodies.
 ==============================================================================
 """
 
@@ -25,7 +27,12 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
     """
+    Functionality:
     Registers a new user with email, username, and password.
+
+    Syntax:
+    - `user_in: UserCreate`: Request body validated against Pydantic schema.
+    - `status.HTTP_201_CREATED`: Standard HTTP response code for resource creation.
     """
     try:
         user = register_user(db, user_in)
@@ -37,7 +44,12 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(login_in: UserLogin, db: Session = Depends(get_db)):
     """
-    Authenticates user credentials and returns a JWT Access Token.
+    Functionality:
+    Authenticates user credentials and returns a signed JWT Access Token.
+
+    Syntax:
+    - `status.HTTP_401_UNAUTHORIZED`: Returns 401 code if credentials do not match.
+    - `headers={"WWW-Authenticate": "Bearer"}`: Standard OAuth2/JWT challenge header.
     """
     user = authenticate_user(db, login_in)
     if not user:
@@ -47,5 +59,6 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # Syntax: Issues a signed JWT with user ID as subject ('sub')
     access_token = create_access_token(subject=user.id)
     return {"access_token": access_token, "token_type": "bearer"}

@@ -8,7 +8,7 @@ CONCEPT EXPLANATION:
    - It sends raw SQL queries over TCP socket network connections to Postgres or SQLite.
 
 2. Session (`SessionLocal`):
-   - A Session represents a "workspace" for database transactions.
+   - A Session represents an active "workspace" for database transactions.
    - Whenever an API request comes in, a new Session is opened, queries are executed, 
      and the session is closed when the request finishes.
 
@@ -16,6 +16,14 @@ CONCEPT EXPLANATION:
    - We attempt to connect to PostgreSQL using your config settings.
    - If PostgreSQL is not created or running yet, we log a helpful notice 
      and fall back to local SQLite (`preai_dev.db`) so your code runs without crashing!
+
+SQLAlchemy Syntax Breakdown:
+- `create_engine(url)`: Creates the database dialect and connection pool.
+- `pool_pre_ping=True`: Tests whether a connection is alive before using it (prevents stale connection crashes).
+- `sessionmaker(...)`: Factory producing database session instances.
+- `autocommit=False`: Requires explicit `db.commit()` to write changes permanently (protects data integrity).
+- `autoflush=False`: Delays flushing objects to database until needed.
+- `Generator` & `yield`: Creates a Python generator dependency for FastAPI. Code before `yield` runs before the API endpoint; code after `yield` (`finally: db.close()`) runs after the response is sent to release DB connections.
 ==============================================================================
 """
 
@@ -39,6 +47,7 @@ def create_database_engine():
     pg_url = settings.sync_database_url
     try:
         # Create PostgreSQL Engine with connection timeout
+        # Syntax: pool_pre_ping=True sends a quick ping before query execution
         engine = create_engine(
             pg_url,
             pool_pre_ping=True,      # Automatically verify live connection before executing queries
@@ -61,12 +70,12 @@ def create_database_engine():
         return engine, "sqlite"
 
 
-# Initialize the database engine
+# Initialize the active database engine
 engine, ACTIVE_DB_TYPE = create_database_engine()
 
 # Create SessionLocal class factory for database transactions
-# autocommit=False: Requires explicit db.commit() for safety
-# autoflush=False: Prevents premature flushing of objects to DB before commit
+# Syntax: autocommit=False ensures transactions only commit when db.commit() is explicitly called
+# Syntax: autoflush=False prevents automatic premature database writes before validation
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -78,6 +87,11 @@ def get_db() -> Generator:
     Usage in FastAPI route:
     `@app.get("/items")`
     `def read_items(db: Session = Depends(get_db)):`
+    
+    Syntax Explanation:
+    - `db = SessionLocal()`: Opens a fresh database transaction session.
+    - `yield db`: Hands the session over to the endpoint function.
+    - `finally: db.close()`: Ensures the connection is returned to the pool even if an error occurs.
     """
     db = SessionLocal()
     try:

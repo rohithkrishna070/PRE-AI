@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # PostgreSQL Configuration details
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_PASSWORD: str = "Rohith@07"
     POSTGRES_DB: str = "preai_db"
     POSTGRES_PORT: str = "5432"
     
@@ -62,10 +62,14 @@ class Settings(BaseSettings):
         Property method that constructs the Database URL.
         If DATABASE_URL environment variable is provided, it uses that.
         Otherwise, it constructs the PostgreSQL URL from individual settings.
+        Uses urllib.parse.quote_plus to safely escape special characters in passwords (e.g. '@', '#').
         """
         if self.DATABASE_URL:
             return self.DATABASE_URL
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        import urllib.parse
+        encoded_user = urllib.parse.quote_plus(self.POSTGRES_USER)
+        encoded_password = urllib.parse.quote_plus(self.POSTGRES_PASSWORD)
+        return f"postgresql://{encoded_user}:{encoded_password}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # --------------------------------------------------------------------------
     # 4. AI Provider Configurations
