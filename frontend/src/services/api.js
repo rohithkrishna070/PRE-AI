@@ -83,6 +83,23 @@ export const runExperiment = async (experimentData) => {
   return response.data;
 };
 
+export const runAdHocExperiment = async (data) => {
+  // data: { prompt, target_models, system_prompt, name }
+  const response = await apiClient.post('/experiments/adhoc', data);
+  return response.data;
+};
+
+export const fetchExperiments = async (projectId) => {
+  const url = projectId ? `/experiments/?project_id=${projectId}` : '/experiments/';
+  const response = await apiClient.get(url);
+  return response.data;
+};
+
+export const fetchExperimentDetails = async (experimentId) => {
+  const response = await apiClient.get(`/experiments/${experimentId}`);
+  return response.data;
+};
+
 // ------------------------------------------------------------------------------
 // 6. Staging & Production Deployments
 // ------------------------------------------------------------------------------
