@@ -18,7 +18,7 @@ Example:
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
 # 1. Base Shared Attributes
@@ -51,5 +51,4 @@ class UserResponse(UserBase):
     is_superuser: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True  # Allows Pydantic to serialize ORM SQLAlchemy objects
+    model_config = ConfigDict(from_attributes=True)

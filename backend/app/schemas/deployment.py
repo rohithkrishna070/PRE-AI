@@ -8,7 +8,7 @@ Schemas for promoting prompt versions to STAGING or PRODUCTION.
 """
 
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class DeploymentCreate(BaseModel):
@@ -26,5 +26,4 @@ class DeploymentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
